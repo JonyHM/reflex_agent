@@ -1,7 +1,18 @@
 from unidecode import unidecode
+import pymysql.cursors
 
 ## TODO: 
 # - possibilidade de mais de uma percepção
+
+con = pymysql.connect(host='localhost',
+                              user='root',
+                              password='',
+                              database='mysql',
+                              cursorclass=pymysql.cursors.DictCursor)
+
+with con.cursor() as cursor:
+    cursor.execute("SELECT * FROM USER")
+    print(cursor.fetchall())
 
 dbRules = [
   {
@@ -36,7 +47,7 @@ def evalRule(rule, percept):
   if len(rule['percepts']) > 1:
     for percept in rule['percepts']:
         evaluation = eval(f'percept {relation} rulePercept') and evaluation
-        
+
     if evaluation:
       return rule['action']
     
