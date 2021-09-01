@@ -3,6 +3,7 @@ import pymysql.cursors
 
 # TODO:
 # - Mudar nomes dos elementos da regra
+# - Validar todas as funcionalidades 
 
 con = pymysql.connect(
     host='localhost',
@@ -61,9 +62,14 @@ def addItemToCard(title='Informe o novo item da sua lista de compras: '):
 
 
 def startShoppingCart():
-    # check dbRules and only proceed if > 0
-    addItemToCard()
-    shoppingCartMenu()
+    dbRules = createDict()
+
+    if len(dbRules) > 0:
+        addItemToCard()
+        shoppingCartMenu()
+    else:
+        print('Você não possui nenhuma regra cadastrada! Cadastre uma para prosseguir.')
+        createNewRule()
 
 
 def evaluateRules():
@@ -71,8 +77,8 @@ def evaluateRules():
     print(actionEngine(dbRules, percepts))
     finalMenu()
 
-######### Helpers #########
 
+######### Helpers #########
 
 def getNumberInput(options, inputTitle='Selecione a opção do menu: '):
     inputValue = input(inputTitle)
