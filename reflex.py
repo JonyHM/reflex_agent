@@ -1,5 +1,6 @@
 from unidecode import unidecode
 import pymysql.cursors
+import numpy as np
 
 ## TODO:
 # - possibilidade de mais de uma percepção
@@ -10,12 +11,8 @@ con = pymysql.connect(host='localhost',
                       password='',
                       database='reflex',
                       cursorclass=pymysql.cursors.DictCursor)
+cursor = con.cursor()
 
-with con.cursor() as cursor:
-    cursor.execute("INSERT INTO rules (pecepts, relation, action_res) values ('teste', '>', 'banana')")
-    con.commit()
-    con.close()
-    print(cursor.fetchall())
 
 dbRules = [
     {
@@ -214,6 +211,30 @@ def deleteSelection():
     returnToMain(deleteSelection)
 
 
-######### Initialization #########
+def creatingDict():
+    percepts = []
+    relation = []
+    cursor.execute('select * from all_percepts')
+    result = cursor.fetchall()
 
-showMainMenu()
+    for i in range(len(result)):
+        cursor.execute('select percept from all_percepts where id_rules = ' + str(i))
+        result = cursor.fetchall()
+        products = []
+        for product in result:
+            products.append(product['percept'])
+        relation.append(products)
+    relation.pop(0)
+
+    for i in range(len(relation)):
+        cursor.execute('select * from all_percepts')
+        result = cursor.fetchall()
+        percepts.append({
+            'products': relation[i],
+            'relation': result[i]['relation'],
+            'action': result[i]['action']
+        })
+    return percepts
+
+######### Initialization #########
+# showMainMenu()
