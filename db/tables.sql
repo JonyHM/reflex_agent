@@ -1,5 +1,12 @@
 #############################################################
 
+# CRIANDO E ACESSANDO O BANCO 
+CREATE DATABASE IF NOT EXISTS reflex;
+
+USE reflex;
+
+#############################################################
+
 # CRIANDO TABELA RULES
 CREATE TABLE IF NOT EXISTS rules(
 	id_rules int(9) AUTO_INCREMENT,
@@ -11,7 +18,7 @@ CREATE TABLE IF NOT EXISTS rules(
 #############################################################
 
 # CRIANDO TABELA PRODUCT
-CREATE TABLE IF NOT EXISTS product(
+CREATE table IF NOT EXISTS product(
 	id_product int(9) AUTO_INCREMENT,
 	product_name varchar(30) NOT NULL,
 	id_rules int(9) NOT NULL,
@@ -78,5 +85,15 @@ DELIMITER ;
 # CHAMADA DA FUNCAO
 
 select FNC_INSERT_PRODUCT('pão', 1);
+
+#############################################################
+
+create or replace view all_percepts as
+select p.id_rules,
+	   p.product_name "percept",
+	   r.relation "relation",
+	   r.action_rules "action"
+	   from product p
+inner join rules r on p.id_rules = r.id_rules;
 
 #############################################################

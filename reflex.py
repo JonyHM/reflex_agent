@@ -3,8 +3,6 @@ import pymysql.cursors
 
 # TODO:
 # - Mudar nomes dos elementos da regra
-# - arrumar listagem
-# - arrumar retorno do id na funç~~ao sql
 
 con = pymysql.connect(
     host='localhost',
@@ -16,48 +14,31 @@ con = pymysql.connect(
 
 cursor = con.cursor()
 percepts = []
-dbRules = []
-# [
-#     {
-#         'percepts': [
-#             'cafe'
-#         ],
-#         'relation': '==',
-#         'action': 'leite'
-#     },
-#     {
-#         'products': [
-#             'cafe',
-#             'leite'
-#         ],
-#         'relation': '==',
-#         'action': 'pao'
-#     }
-# ]
-
 
 ######## Eval engine #########
 
 def evalRule(rule, percepts):
     relation = rule['relation']
-    action = rule['action']
+    action = unidecode(rule['action'])
     evaluation = False
     ruleEval = []
 
-    if len(rule['percepts']) > 1:
-        for rulePercept in rule['percepts']:
+    if len(rule['products']) > 1:
+        for rulePercept in rule['products']:
             for inputPercept in percepts:
+                inputPercept = unidecode(inputPercept)
                 evaluation = eval(f'inputPercept {relation} rulePercept')
                 if evaluation:
                     break
             ruleEval.append(evaluation)
 
-        if len(ruleEval) == len(rule['percepts']) and all(ruleEval) and action not in percepts:
+        if len(ruleEval) == len(rule['products']) and all(ruleEval) and action not in percepts:
             return action
 
     else:
         for inputPercept in percepts:
-            rulePercept = rule['percepts'][0]
+            rulePercept = unidecode(rule['products'][0])
+            inputPercept = unidecode(inputPercept)
             evaluation = eval(f'inputPercept {relation} rulePercept')
             if evaluation and action not in percepts:
                 return action
@@ -76,7 +57,7 @@ def actionEngine(dbRule, percept):
 
 def addItemToCard(title='Informe o novo item da sua lista de compras: '):
     percept = input(title)
-    percepts.append(unidecode(percept))
+    percepts.append(percept)
 
 
 def startShoppingCart():
@@ -86,6 +67,7 @@ def startShoppingCart():
 
 
 def evaluateRules():
+    dbRules = createDict()
     print(actionEngine(dbRules, percepts))
     finalMenu()
 
@@ -165,6 +147,30 @@ def deleteRuleFromDB(ruleId):
     deleteFunc = f"DELETE FROM rules WHERE id_rules = {ruleId};"
     cursor.execute(deleteFunc)
     con.commit()
+
+def createDict():
+    percepts = []
+    relation = []
+    cursor.execute('select * from all_percepts')
+    result = cursor.fetchall()
+    
+    for i, val in enumerate(result):
+        cursor.execute(f'select percept from all_percepts where id_rules = {i + 1}')
+        result = cursor.fetchall()
+        products = []
+        for product in result:
+            products.append(product['percept'])
+        relation.append(products)
+    
+    for i, val in enumerate(relation):
+        cursor.execute('select * from all_percepts')
+        result = cursor.fetchall()
+        percepts.append({
+            'products': val,
+            'relation': result[i]['relation'],
+            'action': result[i]['action']
+        })
+    return percepts
 
 
 ######### Menus #########
@@ -271,17 +277,19 @@ def listRules():
 
 
 def showRules(returnToMainMenu=False):
+    dbRules = createDict()
     for index, rule in enumerate(dbRules):
-        perception = rule['percept']
-        opperator = rule['relation']
+        products = '; '.join(rule['products'])
+        relation = rule['relation']
         action = rule['action']
+        
         print(f'\n{index + 1} -')
-        print(f'Produtos: {perception}')
-        print(f'Relação: {opperator}')
+        print(f'Produtos: {products}')
+        print(f'Relação: {relation}')
         print(f'Recomendação: {action}\n')
 
     if returnToMainMenu:
-        returnToMain(lambda: showRules(returnToMainMenu))
+        returnToMain(showManagementMenu)
 
 
 def createNewRule():
@@ -330,6 +338,7 @@ def deleteRule(ruleId):
 
 def deleteSelection():
     showRules()
+    dbRules = createDict()
     ruleId = getNumberInput(
         dbRules, 'Insira o índice da regra a ser excluída (0 para voltar): ')
 
