@@ -410,7 +410,7 @@ class Management:
             print(f'\nRegra {idToShow} excluída com sucesso!')
         else:
             print('Opção inválida! Insira S para sim ou N para não\n')
-            self.deleteRule(ruleId)
+            self.deleteRule(ruleId, idToShow)
 
 
     def deleteSelection(self):
