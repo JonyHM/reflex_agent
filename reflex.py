@@ -89,6 +89,7 @@ class DBConnect:
 
 
     def getDbRules(self):
+        self.updateRules()
         return self.dbRules
     
 
@@ -111,7 +112,6 @@ class DBConnect:
         relation = []
         self.cursor.execute('select * from rules')
         result = self.cursor.fetchall()
-
         for i, val in enumerate(result):
             self.cursor.execute(f'select percept from all_percepts where id_rules = {val["id_rules"]}')
             result = self.cursor.fetchall()
@@ -123,12 +123,12 @@ class DBConnect:
             relation.append(products)
         
         for i, val in enumerate(relation):
-            self.cursor.execute('select * from all_percepts')
+            self.cursor.execute('select * from rules')
             result = self.cursor.fetchall()
             percepts.append({
                 'products': val,
                 'relation': result[i]['relation'],
-                'action': result[i]['action']
+                'action': result[i]['action_rules']
             })
         return percepts
 
@@ -354,7 +354,6 @@ class Management:
         dbRules = self.dbConnect.getDbRules()
 
         if len(dbRules) > 0:
-
             for index, rule in enumerate(dbRules):
                 products = '; '.join(rule['products']['values'])
                 relation = rule['relation']
@@ -388,7 +387,6 @@ class Management:
             elif response.lower() == 's' or response == '':
                 product = input('Produto: ')
                 products.append(product)
-                break
             else:
                 print('Opção inválida! Insira S para sim ou N para não\n')
 
@@ -409,7 +407,7 @@ class Management:
             return
         elif response.lower() == 's' or response == '':
             self.dbConnect.deleteRuleFromDB(ruleId)
-            print(f'\nRegra {ruleId} excluída com sucesso!')
+            print(f'\nRegra {idToShow} excluída com sucesso!')
         else:
             print('Opção inválida! Insira S para sim ou N para não\n')
             self.deleteRule(ruleId)
@@ -426,7 +424,7 @@ class Management:
             self.shopping.showManagementMenu()
 
         idToDelete = dbRules[ruleId - 1]['products']['id']
-        self.deleteRule(idToDelete, idToShow)
+        self.deleteRule(idToDelete, ruleId)
         self.shopping.returnToMain(self.deleteSelection)
 
 
@@ -437,6 +435,7 @@ def start():
 
     con = pymysql.connect(
         host='localhost',
+        port=3306, ## porta padrão do mariaDB
         user='root',
         password='fatec',
         database='reflex',
