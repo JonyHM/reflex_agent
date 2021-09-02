@@ -20,25 +20,26 @@ class Reflex:
 
     def evalRule(self, rule):
         relation = rule['relation']
-        action = unidecode(rule['action'])
+        action = rule['action']
         evaluation = False
         ruleEval = []
 
-        if len(rule['products']) > 1:
-            for rulePercept in rule['products']:
+        if len(rule['products']['values']) > 1:
+            for rulePercept in rule['products']['values']:
                 for inputPercept in self.percepts:
                     inputPercept = unidecode(inputPercept)
+                    rulePercept = unidecode(rulePercept)
                     evaluation = eval(f'inputPercept {relation} rulePercept')
                     if evaluation:
                         break
                 ruleEval.append(evaluation)
 
-            if len(ruleEval) == len(rule['products']) and all(ruleEval) and action not in self.percepts:
+            if len(ruleEval) == len(rule['products']['values']) and all(ruleEval) and action not in self.percepts:
                 return action
 
         else:
             for inputPercept in self.percepts:
-                rulePercept = unidecode(rule['products'][0])
+                rulePercept = unidecode(rule['products']['values'][0])
                 inputPercept = unidecode(inputPercept)
                 evaluation = eval(f'inputPercept {relation} rulePercept')
                 if evaluation and action not in self.percepts:
@@ -108,15 +109,17 @@ class DBConnect:
     def createDict(self):
         percepts = []
         relation = []
-        self.cursor.execute('select * from all_percepts')
+        self.cursor.execute('select * from rules')
         result = self.cursor.fetchall()
-                
-        for val in result:
+
+        for i, val in enumerate(result):
             self.cursor.execute(f'select percept from all_percepts where id_rules = {val["id_rules"]}')
             result = self.cursor.fetchall()
-            products = []
+            products = {}
+            products['values'] = []
+            products['id'] = val["id_rules"]
             for product in result:
-                products.append(product['percept'])
+                products['values'].append(product['percept'])
             relation.append(products)
         
         for i, val in enumerate(relation):
@@ -235,17 +238,17 @@ class Shopping:
 
 
     def shoppingCartMenu(self):
-        print('Gostaria de adicionar um novo item na lista?')
-        print('\t1 - Sim')
-        print('\t2 - Não\n')
+        
+        while True:
+            response = input(f'Gostaria de adicionar um novo item na lista? [S/n] ')
 
-        options = {
-            1: self.startShoppingCart,
-            2: self.evaluateRules
-        }
-
-        menuInput = self.helper.getNumberInput(options)
-        options[menuInput]()
+            if response.lower() == 'n':
+                self.evaluateRules()
+                break
+            elif response.lower() == 's' or response == '':
+                self.startShoppingCart()
+            else:
+                print('Opção inválida! Insira S para sim ou N para não\n')
 
 
     def showManagementMenu(self):
@@ -312,38 +315,9 @@ class Helper:
         except:
             print('Opção inválida! Tente novamente')
 
-        return getNumberInput(options, inputTitle)
+        return self.getNumberInput(options, inputTitle)
 
-    def parse_sql(self, filename):
-        data = open(filename, 'r').readlines()
-        stmts = []
-        DELIMITER = ';'
-        stmt = ''
-
-        for lineno, line in enumerate(data):
-            if not line.strip():
-                continue
-
-            if line.startswith('--'):
-                continue
-
-            if 'DELIMITER' in line:
-                DELIMITER = line.split()[1]
-                continue
-
-            if (DELIMITER not in line):
-                stmt += line.replace(DELIMITER, ';')
-                continue
-
-            if stmt:
-                stmt += line
-                stmts.append(stmt.strip())
-                stmt = ''
-            else:
-                stmts.append(line.strip())
-        return stmts
-
-
+    
 
 ######### Management #########
 
@@ -379,18 +353,23 @@ class Management:
         self.dbConnect.updateRules()
         dbRules = self.dbConnect.getDbRules()
 
-        for index, rule in enumerate(dbRules):
-            products = '; '.join(rule['products'])
-            relation = rule['relation']
-            action = rule['action']
-            
-            print(f'\n{index + 1} -')
-            print(f'Produtos: {products}')
-            print(f'Relação: {relation}')
-            print(f'Recomendação: {action}\n')
+        if len(dbRules) > 0:
 
-        if returnToMainMenu:
-            self.shopping.returnToMain(self.shopping.showManagementMenu)
+            for index, rule in enumerate(dbRules):
+                products = '; '.join(rule['products']['values'])
+                relation = rule['relation']
+                action = rule['action']
+                
+                print(f'\n{index + 1} -')
+                print(f'Produtos: {products}')
+                print(f'Relação: {relation}')
+                print(f'Recomendação: {action}\n')
+
+            if returnToMainMenu:
+                self.shopping.returnToMain(self.shopping.showManagementMenu)
+        else:
+            print('Você não possui nenhuma regra cadastrada! Cadastre uma para prosseguir.')
+            self.createNewRule()
 
 
     def createNewRule(self):
@@ -400,9 +379,8 @@ class Management:
         products = []
         product = input('Produto: ')
         products.append(product)
-        response = None
 
-        while response == None or response.lower() != 'n' or response.lower() == 's' or response == '':
+        while True:
             response = input(f'Adicionar mais um produto à regra? [S/n] ')
 
             if response.lower() == 'n':
@@ -410,7 +388,7 @@ class Management:
             elif response.lower() == 's' or response == '':
                 product = input('Produto: ')
                 products.append(product)
-
+                break
             else:
                 print('Opção inválida! Insira S para sim ou N para não\n')
 
@@ -424,8 +402,8 @@ class Management:
         self.shopping.returnToMain(self.createNewRule)
 
 
-    def deleteRule(self, ruleId):
-        response = input(f'Excluír regra {ruleId}? [S/n] ')
+    def deleteRule(self, ruleId, idToShow):
+        response = input(f'Excluír regra {idToShow}? [S/n] ')
 
         if response.lower() == 'n':
             return
@@ -447,22 +425,13 @@ class Management:
         if ruleId == 0:
             self.shopping.showManagementMenu()
 
-        self.deleteRule(ruleId)
+        idToDelete = dbRules[ruleId - 1]['products']['id']
+        self.deleteRule(idToDelete, idToShow)
         self.shopping.returnToMain(self.deleteSelection)
 
 
 
 ######### Initialization #########
-
-# stmts = parse_sql('db\\tables.sql')
-# for line in stmts:
-#     print(line)
-#     cursor.execute(line)
-
-# rules = cursor.fetchall()
-# rule = rules[0]
-# print(rule['action_rules'])
-
 
 def start():
 
