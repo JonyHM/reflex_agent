@@ -140,7 +140,19 @@ inner join rules r on p.id_rules = r.id_rules
 
 #### 4. Executando a aplicação:
 
-4.1. Estando na raiz do projeto, execute o comando abaixo e siga os menus interativos para cadastrar novas regras e testar as regras existentes:
+4.1. Antes de executar, é necessário revisar os dados no final do arquivo "reflex.py", alterando as informações de credenciais do banco, caso necessário. O padrão está conforme abaixo:
+```
+con = pymysql.connect(
+        host='localhost',
+        port=3306, ## porta padrão do mariaDB
+        user='root',
+        password='fatec',
+        database='reflex',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+```
+
+4.2. Estando na raiz do projeto, execute o comando abaixo e siga os menus interativos para cadastrar novas regras e testar as regras existentes:
 ```
 python reflex.py
 ```
