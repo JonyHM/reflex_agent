@@ -1,5 +1,6 @@
 import pandas as pd
 import pymysql.cursors
+import matplotlib.pyplot as plt
 
 con = pymysql.connect(
   host='localhost',
@@ -23,4 +24,152 @@ def readAndInsert():
   con.commit()
   print("dados inseridos com sucesso!!")
 
-readAndInsert()
+def selectTypes():
+  cursor = con.cursor()
+  cursor.execute('SELECT count(distinct bsk_item) as tipos from basket;')
+  result = cursor.fetchall()
+  print(result[0]['tipos'])
+
+def plotb():
+  items = {}
+  cursor = con.cursor()
+  cursor.execute('SELECT distinct bsk_item as product from basket;')
+  result = cursor.fetchall()
+  
+  for item in result:
+    product = item['product']
+    cursor.execute(f'''SELECT count(bsk_item) as total from basket where bsk_item = "{product}";''')
+    
+    result = cursor.fetchall()
+    total = result[0]['total']
+    items[product] = total
+  
+  names = list(items.keys())
+  values = list(items.values())
+  values = sorted(values)
+
+  plt.figure(figsize=(10,100))
+  plt.yticks(fontsize=8)
+  plt.barh(range(len(items)), values, tick_label=names)
+  plt.show()
+
+def plotc():
+  items = {}
+  cursor = con.cursor()
+  cursor.execute('SELECT distinct bsk_item as product from basket;')
+  result = cursor.fetchall()
+  
+  for item in result:
+    product = item['product']
+    cursor.execute(f'''SELECT count(bsk_item) as total from basket where bsk_item = "{product}" and 
+    bsk_period_day = "morning";''')
+    
+    result = cursor.fetchall()
+    total = result[0]['total']
+    items[product] = total
+  
+  names = list(items.keys())
+  values = list(items.values())
+  values = sorted(values)
+
+  plt.figure(figsize=(10,100))
+  plt.yticks(fontsize=8)
+  plt.barh(range(len(items)), values, tick_label=names)
+  plt.show()
+
+def plotd():
+  items = {}
+  cursor = con.cursor()
+  cursor.execute('SELECT distinct bsk_item as product from basket;')
+  result = cursor.fetchall()
+  
+  for item in result:
+    product = item['product']
+    cursor.execute(f'''SELECT count(bsk_item) as total from basket where bsk_item = "{product}" and 
+    bsk_period_day = "afternoon";''')
+    
+    result = cursor.fetchall()
+    total = result[0]['total']
+    items[product] = total
+  
+  names = list(items.keys())
+  values = list(items.values())
+  values = sorted(values)
+
+  plt.figure(figsize=(10,100))
+  plt.yticks(fontsize=8)
+  plt.barh(range(len(items)), values, tick_label=names)
+  plt.show()
+
+def plote():
+  items = {}
+  cursor = con.cursor()
+  cursor.execute('SELECT distinct bsk_item as product from basket;')
+  result = cursor.fetchall()
+  
+  for item in result:
+    product = item['product']
+    cursor.execute(f'''SELECT count(bsk_item) as total from basket where bsk_item = "{product}" and 
+    bsk_period_day = "evening";''')
+    
+    result = cursor.fetchall()
+    total = result[0]['total']
+    items[product] = total
+  
+  names = list(items.keys())
+  values = list(items.values())
+  values = sorted(values)
+
+  plt.figure(figsize=(10,100))
+  plt.yticks(fontsize=8)
+  plt.barh(range(len(items)), values, tick_label=names)
+  plt.show()
+
+def apriori():
+  print('TODO')
+
+def sair():
+  con.close()
+  exit()
+
+def getNumberInput(options, inputTitle='Selecione a opção do menu: '):
+  inputValue = input(inputTitle)
+
+  try:
+      inputValue = int(inputValue)
+      if inputValue <= len(options):
+          return inputValue
+      print('Opção inválida! Tente novamente')
+  except:
+      print('Opção inválida! Tente novamente')
+
+  return getNumberInput(options, inputTitle)
+
+
+
+print('\n---------------------------------------------\n')
+print('''SISTEMAS DE RECOMENDAÇÃO E ANÁLISE DE DADOS USANDO
+    AGENTES RACIONAIS E ALGORITMO APRIORI\n''')
+
+print('\t1 - Quantidade de tipos de produtos do mercado')
+print('\t2 - Gráfico com total de vendas de cada produto')
+print('\t3 - Gráfico com total de vendas de cada produto ocorridas de manhã')
+print('\t4 - Gráfico com total de vendas de cada produto ocorridas de tarde')
+print('\t5 - Gráfico com total de vendas de cada produto ocorridas de noite')
+print('\t6 - Associações fortes com apriori')
+print('\n\n\t7 - Sair')
+
+print('\n---------------------------------------------\n')
+
+options = {
+  1: selectTypes,
+  2: plotb,
+  3: plotc,
+  4: plotd,
+  5: plote,
+  6: apriori,
+  7: sair
+}
+
+menuInput = getNumberInput(options)
+options[menuInput]()
