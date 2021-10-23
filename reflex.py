@@ -449,6 +449,3 @@ def start():
     shopping = Shopping(reflex, db, mgmt, helper)
 
     shopping.showMainMenu()
-
-
-start()

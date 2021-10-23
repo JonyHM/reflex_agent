@@ -1,5 +1,6 @@
 import pandas as pd
 import pymysql.cursors
+import aprioriAlgorithm
 import matplotlib.pyplot as plt
 
 con = pymysql.connect(
@@ -126,7 +127,29 @@ def plote():
   plt.show()
 
 def apriori():
-  print('TODO')
+  items = []
+  transactions = []
+
+  cursor = con.cursor()
+  cursor.execute('SELECT distinct bsk_item as tipos from basket;')
+  result = cursor.fetchall()
+
+  items = [item['tipos'] for item in result if item['tipos']]
+
+  cursor.execute('select distinct bsk_transaction as value from basket;')
+  result = cursor.fetchall()
+
+  for transaction in result:
+    value = transaction['value']
+    cursor.execute(f'SELECT distinct bsk_item as item FROM basket WHERE bsk_transaction = {value};')
+    result = cursor.fetchall()
+    values = [value['item'] for value in result if value['item']]
+    transactions.append(values)
+
+  print(items)
+  print(transactions)
+  ap = aprioriAlgorithm.Apriori(items, transactions)
+  ap.start()
 
 def sair():
   con.close()
@@ -145,31 +168,30 @@ def getNumberInput(options, inputTitle='Selecione a opção do menu: '):
 
   return getNumberInput(options, inputTitle)
 
+def start():
+  print('\n---------------------------------------------\n')
+  print('''SISTEMAS DE RECOMENDAÇÃO E ANÁLISE DE DADOS USANDO
+      AGENTES RACIONAIS E ALGORITMO APRIORI\n''')
 
+  print('\t1 - Quantidade de tipos de produtos do mercado')
+  print('\t2 - Gráfico com total de vendas de cada produto')
+  print('\t3 - Gráfico com total de vendas de cada produto ocorridas de manhã')
+  print('\t4 - Gráfico com total de vendas de cada produto ocorridas de tarde')
+  print('\t5 - Gráfico com total de vendas de cada produto ocorridas de noite')
+  print('\t6 - Associações fortes com apriori')
+  print('\n\n\t7 - Sair')
 
-print('\n---------------------------------------------\n')
-print('''SISTEMAS DE RECOMENDAÇÃO E ANÁLISE DE DADOS USANDO
-    AGENTES RACIONAIS E ALGORITMO APRIORI\n''')
+  print('\n---------------------------------------------\n')
 
-print('\t1 - Quantidade de tipos de produtos do mercado')
-print('\t2 - Gráfico com total de vendas de cada produto')
-print('\t3 - Gráfico com total de vendas de cada produto ocorridas de manhã')
-print('\t4 - Gráfico com total de vendas de cada produto ocorridas de tarde')
-print('\t5 - Gráfico com total de vendas de cada produto ocorridas de noite')
-print('\t6 - Associações fortes com apriori')
-print('\n\n\t7 - Sair')
+  options = {
+    1: selectTypes,
+    2: plotb,
+    3: plotc,
+    4: plotd,
+    5: plote,
+    6: apriori,
+    7: sair
+  }
 
-print('\n---------------------------------------------\n')
-
-options = {
-  1: selectTypes,
-  2: plotb,
-  3: plotc,
-  4: plotd,
-  5: plote,
-  6: apriori,
-  7: sair
-}
-
-menuInput = getNumberInput(options)
-options[menuInput]()
+  menuInput = getNumberInput(options)
+  options[menuInput]()
