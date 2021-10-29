@@ -7,3 +7,9 @@ CREATE table IF NOT EXISTS basket(
   bsk_weekday_weekend varchar(10) NOT NULL,
 	PRIMARY KEY (bsk_id)
 );
+
+CREATE table IF NOT EXISTS product_base(
+	pb_id int(9) AUTO_INCREMENT,
+	pb_name varchar(100) NOT NULL,
+	PRIMARY KEY (bsk_id)
+);

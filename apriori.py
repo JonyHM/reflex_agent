@@ -1,3 +1,4 @@
+import helper
 import pandas as pd
 import pymysql.cursors
 import aprioriAlgorithm
@@ -12,6 +13,8 @@ con = pymysql.connect(
   cursorclass=pymysql.cursors.DictCursor
 )
 
+helper = helper.Helper()
+
 def readAndInsert():
   basket = pd.read_csv(r'./files/basket.csv')
   df = pd.DataFrame(basket)
@@ -24,12 +27,28 @@ def readAndInsert():
     cursor.execute(sql)
   con.commit()
   print("dados inseridos com sucesso!!")
+  sair()
+
+def populateProduct():
+  cursor = con.cursor()
+  cursor.execute('SELECT distinct bsk_item as tipos from basket;')
+  result = cursor.fetchall()
+
+  items = [item['tipos'] for item in result if item['tipos']]
+
+  for item in items:
+    sql = f'''INSERT INTO product_base(pb_name) VALUES ("{item}");'''
+    print(sql)
+    cursor.execute(sql)
+  con.commit()
+  sair()
 
 def selectTypes():
   cursor = con.cursor()
   cursor.execute('SELECT count(distinct bsk_item) as tipos from basket;')
   result = cursor.fetchall()
   print(result[0]['tipos'])
+  sair()
 
 def plotb():
   items = {}
@@ -53,6 +72,7 @@ def plotb():
   plt.yticks(fontsize=8)
   plt.barh(range(len(items)), values, tick_label=names)
   plt.show()
+  sair()
 
 def plotc():
   items = {}
@@ -77,6 +97,7 @@ def plotc():
   plt.yticks(fontsize=8)
   plt.barh(range(len(items)), values, tick_label=names)
   plt.show()
+  sair()
 
 def plotd():
   items = {}
@@ -101,6 +122,7 @@ def plotd():
   plt.yticks(fontsize=8)
   plt.barh(range(len(items)), values, tick_label=names)
   plt.show()
+  sair()
 
 def plote():
   items = {}
@@ -125,13 +147,14 @@ def plote():
   plt.yticks(fontsize=8)
   plt.barh(range(len(items)), values, tick_label=names)
   plt.show()
+  sair()
 
 def apriori():
   items = []
   transactions = []
 
   cursor = con.cursor()
-  cursor.execute('SELECT distinct bsk_item as tipos from basket;')
+  cursor.execute('SELECT distinct pb_name as tipos from product_base;')
   result = cursor.fetchall()
 
   items = [item['tipos'] for item in result if item['tipos']]
@@ -141,32 +164,18 @@ def apriori():
 
   for transaction in result:
     value = transaction['value']
-    cursor.execute(f'SELECT distinct bsk_item as item FROM basket WHERE bsk_transaction = {value};')
+    cursor.execute(f'SELECT bsk_item as item FROM basket WHERE bsk_transaction = {value};')
     result = cursor.fetchall()
     values = [value['item'] for value in result if value['item']]
     transactions.append(values)
-
-  print(items)
-  print(transactions)
+  
   ap = aprioriAlgorithm.Apriori(items, transactions)
   ap.start()
+  sair()
 
 def sair():
   con.close()
   exit()
-
-def getNumberInput(options, inputTitle='Selecione a opção do menu: '):
-  inputValue = input(inputTitle)
-
-  try:
-      inputValue = int(inputValue)
-      if inputValue <= len(options):
-          return inputValue
-      print('Opção inválida! Tente novamente')
-  except:
-      print('Opção inválida! Tente novamente')
-
-  return getNumberInput(options, inputTitle)
 
 def start():
   print('\n---------------------------------------------\n')
@@ -179,7 +188,11 @@ def start():
   print('\t4 - Gráfico com total de vendas de cada produto ocorridas de tarde')
   print('\t5 - Gráfico com total de vendas de cada produto ocorridas de noite')
   print('\t6 - Associações fortes com apriori')
-  print('\n\n\t7 - Sair')
+
+  print('\n\t7 - Popular banco de transações')
+  print('\t8 - Popular banco de produtos')
+
+  print('\n\n\t9 - Sair')
 
   print('\n---------------------------------------------\n')
 
@@ -190,8 +203,10 @@ def start():
     4: plotd,
     5: plote,
     6: apriori,
-    7: sair
+    7: readAndInsert,
+    8: populateProduct,
+    9: sair
   }
 
-  menuInput = getNumberInput(options)
+  menuInput = helper.getNumberInput(options)
   options[menuInput]()
