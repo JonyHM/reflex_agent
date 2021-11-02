@@ -62,5 +62,5 @@ class Apriori:
         return ass_rules
 
     def start(self):
-        print(self.apriori_2(self.itemSet, self.transactions, 0.4, 0.1))
+        print(self.apriori_2(self.itemSet, self.transactions, 0.07, 0.07))
         cont = input('Press enter to continue...')

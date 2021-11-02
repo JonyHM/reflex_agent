@@ -166,7 +166,7 @@ def apriori():
     value = transaction['value']
     cursor.execute(f'SELECT bsk_item as item FROM basket WHERE bsk_transaction = {value};')
     result = cursor.fetchall()
-    values = [value['item'] for value in result if value['item']]
+    values = set([value['item'] for value in result if value['item']])
     transactions.append(values)
   
   ap = aprioriAlgorithm.Apriori(items, transactions)
