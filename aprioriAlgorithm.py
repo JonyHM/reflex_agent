@@ -61,6 +61,19 @@ class Apriori:
         ass_rules[1] = self.prune(ass_rules[1],min_sup, min_conf)
         return ass_rules
 
-    def start(self):
-        print(self.apriori_2(self.itemSet, self.transactions, 0.07, 0.07))
-        cont = input('Press enter to continue...')
+    def start(self, callback = None):
+        data = self.apriori_2(self.itemSet, self.transactions, 0.6, 0.8)
+        print(data[0])
+        print(data[1])
+        
+        rules = []
+
+        for item in data[1]:
+            rawRule = item['rule'].split('_')
+            print(rawRule)
+            rule = {}
+            rule['products'] = rawRule[0]
+            rule['relation'] = '=='
+            rule['action'] = rawRule[1]
+            rules.append(rule)
+        return rules

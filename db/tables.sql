@@ -97,3 +97,14 @@ select p.id_rules,
 inner join rules r on p.id_rules = r.id_rules;
 
 #############################################################
+
+# CRIANDO TABELA BASKET
+CREATE table IF NOT EXISTS basket(
+	bsk_id int(9) AUTO_INCREMENT,
+  bsk_transaction_id int(9) NOT NULL,
+	bsk_item_name varchar(100) NOT NULL,
+	PRIMARY KEY (bsk_id)
+);
+
+# CRIANDO SEQUENCE PARA CONTROLE DO ID DE TRANSAÇÃO
+CREATE SEQUENCE id_transaction START WITH 1 INCREMENT BY 1;

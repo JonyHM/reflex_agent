@@ -1,8 +1,8 @@
-import helper
 import pandas as pd
 import pymysql.cursors
-import aprioriAlgorithm
+from helper import Helper
 import matplotlib.pyplot as plt
+from aprioriAlgorithm import Apriori
 
 con = pymysql.connect(
   host='localhost',
@@ -13,7 +13,7 @@ con = pymysql.connect(
   cursorclass=pymysql.cursors.DictCursor
 )
 
-helper = helper.Helper()
+helper = Helper()
 
 def readAndInsert():
   basket = pd.read_csv(r'./files/basket.csv')
@@ -31,7 +31,7 @@ def readAndInsert():
 
 def populateProduct():
   cursor = con.cursor()
-  cursor.execute('SELECT distinct bsk_item as tipos from basket;')
+  cursor.execute('SELECT distinct bsk_item as tipos from apriori.basket;')
   result = cursor.fetchall()
 
   items = [item['tipos'] for item in result if item['tipos']]
@@ -169,7 +169,7 @@ def apriori():
     values = set([value['item'] for value in result if value['item']])
     transactions.append(values)
   
-  ap = aprioriAlgorithm.Apriori(items, transactions)
+  ap = Apriori(items, transactions)
   ap.start()
   sair()
 

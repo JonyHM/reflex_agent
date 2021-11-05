@@ -1,6 +1,6 @@
 import reflex as reflexModule
 import apriori as aprioriModule
-import helper as helperModule
+from helper import Helper
 
 def reflexAgent():
   reflexModule.start()
@@ -23,6 +23,6 @@ options = {
   3: exit
 }
 
-helper = helperModule.Helper()
+helper = Helper()
 menuInput = helper.getNumberInput(options)
 options[menuInput]()
