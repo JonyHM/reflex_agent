@@ -13,3 +13,5 @@ CREATE table IF NOT EXISTS product_base(
 	pb_name varchar(100) NOT NULL,
 	PRIMARY KEY (bsk_id)
 );
+
+CREATE SEQUENCE id_transaction START WITH 1 INCREMENT BY 1;
