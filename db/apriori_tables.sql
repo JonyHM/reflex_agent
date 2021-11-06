@@ -11,7 +11,7 @@ CREATE table IF NOT EXISTS basket(
 CREATE table IF NOT EXISTS product_base(
 	pb_id int(9) AUTO_INCREMENT,
 	pb_name varchar(100) NOT NULL,
-	PRIMARY KEY (bsk_id)
+	PRIMARY KEY (pb_id)
 );
 
 CREATE SEQUENCE id_transaction START WITH 1 INCREMENT BY 1;
