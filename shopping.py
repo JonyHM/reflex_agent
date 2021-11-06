@@ -42,7 +42,7 @@ class Shopping:
     items, transactions = self.dbConnect.listTransactions()
     
     ap = Apriori(items, transactions)
-    rules = ap.start()
+    rules = ap.start(0.6, 0.8)
     for rule in rules:
       self.dbConnect.createRuleAndProducts(rule)    
     self.finalMenu()
@@ -103,8 +103,12 @@ class Shopping:
     print('\t1 - Criar nova regra')
     print('\t2 - Excluir item da lista')
     print('\t3 - Listar regras')
-    print('\n\t4 - Voltar ao menu principal')
-    print('\n\n\t5 - Sair')
+    print('\t4 - Criar novo produto')
+    print('\t5 - Excluir produto da lista')
+    print('\t6 - Listar produtos')
+
+    print('\n\t7 - Voltar ao menu principal')
+    print('\n\n\t8 - Sair')
 
     print('\n---------------------------------------------\n')
 
@@ -112,8 +116,11 @@ class Shopping:
       1: self.management.createNewRule,
       2: self.management.deleteSelection,
       3: self.management.listRules,
-      4: self.showMainMenu,
-      5: self.exitProject
+      4: self.management.createNewProduct,
+      5: self.management.productDeleteSelection,
+      6: self.management.listProducts,
+      7: self.showMainMenu,
+      8: self.exitProject
     }
 
     menuInput = self.helper.getNumberInput(options)
@@ -123,7 +130,7 @@ class Shopping:
     print('\n---------------------------------------------\n')
     print('Menu principal\n')
 
-    print('\t1 - Gerenciamento de regras')
+    print('\t1 - Gerenciamento de regras e produtos')
     print('\t2 - Iniciar compras')
     print('\t3 - Algoritmo Apriori')
     print('\n\n\t4 - Sair')

@@ -84,6 +84,22 @@ class DBConnect:
     
     self.connection.commit()
 
+  def createProducts(self, products):
+    for product in products:
+      sql = f'''INSERT INTO product_base(pb_name) VALUES ("{product}");'''
+      self.cursor.execute(sql)
+
+    self.connection.commit()
+
+  def getProducts(self):
+    items = []
+    products = {}
+
+    self.cursor.execute('SELECT distinct pb_id as id, pb_name as tipos from product_base;')
+    result = self.cursor.fetchall()
+    
+    return result
+
   def listProducts(self):
     items = []
     transactions = []
@@ -99,6 +115,11 @@ class DBConnect:
       products[index + 1] = item
     
     return products
+
+  def deleteProductFromDB(self, productId):
+    deleteFunc = f"DELETE FROM product_base WHERE pb_id = {productId};"
+    self.cursor.execute(deleteFunc)
+    self.connection.commit()
   
   def insertNewTransaction(self, transactionItems):
     self.cursor.execute("select nextval(id_transaction) as ID from dual;")

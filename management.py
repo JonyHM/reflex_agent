@@ -4,6 +4,7 @@ class Management:
     self.dbConnect = dbConnect
     self.shopping = shopping
     self.helper = helper
+    self.products = []
 
   def getDbConnect(self):
     return self.dbConnect
@@ -43,11 +44,13 @@ class Management:
 
   def createNewRule(self):
     print('\nCriar nova regra\n')
+    self.products = self.dbConnect.listProducts()
 
     rule = {}
     products = []
-    product = input('Produto: ')
-    products.append(product)
+    product = self.helper.getNumberInput(self.products, "Insira o número do produto: ")
+    print(self.products[product])
+    products.append(self.products[product])
 
     while True:
       response = input(f'Adicionar mais um produto à regra? [S/n] ')
@@ -55,14 +58,19 @@ class Management:
       if response.lower() == 'n':
         break
       elif response.lower() == 's' or response == '':
-        product = input('Produto: ')
-        products.append(product)
+        product = self.helper.getNumberInput(self.products, "Insira o número do produto: ")
+        products.append(self.products[product])
+        print(self.products[product])
       else:
         print('Opção inválida! Insira S para sim ou N para não\n')
 
+    actionId = self.helper.getNumberInput(self.products, "Insira o número da recomendação: ")
+    action = self.products[actionId]
+    print(f'Recomendação: {action}')
+
     rule['products'] = products
     rule['relation'] = '=='
-    rule['action'] = input('Recomendação: ')
+    rule['action'] = action
 
     self.dbConnect.createRuleAndProducts(rule)
     
@@ -94,3 +102,67 @@ class Management:
     idToDelete = dbRules[ruleId - 1]['products']['id']
     self.deleteRule(idToDelete, ruleId)
     self.shopping.returnToMain(self.deleteSelection)
+
+  def listProducts(self):
+    self.showProducts(True)
+
+  def showProducts(self, returnToMainMenu=False):
+    products = self.dbConnect.listProducts()
+
+    if len(products) == 0:
+      print('Você não possui nenhum produto cadastrado! Cadastre um para prosseguir.')
+      self.createNewProduct()
+
+    else:
+      if returnToMainMenu:
+        self.shopping.returnToMain(self.shopping.showManagementMenu)
+      else: 
+        return products
+
+  def createNewProduct(self):
+    print('\nCriar novo produto\n')
+
+    product = input('Insira o nome do produto: ')
+    response = input(f'Criar {product}? [S/n] ')
+
+    while True:
+      
+      if response.lower() == 'n':
+        break
+      elif response.lower() == 's' or response == '':
+        self.dbConnect.createProducts([product])  
+        break
+      else:
+        print('Opção inválida! Insira S para sim ou N para não\n')
+        
+    print('\Produto criado com sucesso!\n')
+    self.shopping.returnToMain(self.createNewProduct)
+
+  def deleteProduct(self, productId, nameToShow):
+    response = input(f'Excluír produto "{nameToShow}"? [S/n] ')
+
+    if response.lower() == 'n':
+      return
+    elif response.lower() == 's' or response == '':
+      self.dbConnect.deleteProductFromDB(productId)
+      print(f'\nProduto "{nameToShow}" excluído com sucesso!')
+    else:
+      print('Opção inválida! Insira S para sim ou N para não\n')
+      self.deleteProduct(productId, nameToShow)
+
+  def productDeleteSelection(self):
+    products = self.dbConnect.getProducts()
+
+    for index, item in enumerate(products):
+      print(f'{index + 1} - {item["tipos"]}')
+    productId = self.helper.getNumberInput(products, 'Insira o índice do produto a ser excluído (0 para voltar): ')
+
+    if productId == 0:
+      self.shopping.showManagementMenu()
+
+    productToDelete = products[productId - 1]
+    idToDelete = productToDelete['id']
+    nameToShow = productToDelete['tipos']
+
+    self.deleteProduct(idToDelete, nameToShow)
+    self.shopping.returnToMain(self.productDeleteSelection)

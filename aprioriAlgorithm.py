@@ -61,8 +61,8 @@ class Apriori:
         ass_rules[1] = self.prune(ass_rules[1],min_sup, min_conf)
         return ass_rules
 
-    def start(self, callback = None):
-        data = self.apriori_2(self.itemSet, self.transactions, 0.6, 0.8)
+    def start(self, min_sup = 0.01, min_conf = 0.6):
+        data = self.apriori_2(self.itemSet, self.transactions, min_sup, min_conf)
         print(data[0])
         print(data[1])
         
