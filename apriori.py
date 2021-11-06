@@ -91,7 +91,6 @@ def plotc():
   
   names = list(items.keys())
   values = list(items.values())
-  values = sorted(values)
 
   plt.figure(figsize=(10,100))
   plt.yticks(fontsize=8)
@@ -116,7 +115,6 @@ def plotd():
   
   names = list(items.keys())
   values = list(items.values())
-  values = sorted(values)
 
   plt.figure(figsize=(10,100))
   plt.yticks(fontsize=8)
@@ -141,7 +139,6 @@ def plote():
   
   names = list(items.keys())
   values = list(items.values())
-  values = sorted(values)
 
   plt.figure(figsize=(10,100))
   plt.yticks(fontsize=8)
