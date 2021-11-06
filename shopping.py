@@ -20,12 +20,12 @@ class Shopping:
     self.listProducts()
     self.dbConnect.updateRules()
 
-    if len(self.dbConnect.getDbRules()) > 0:
-      self.addItemToCard()
-      self.shoppingCartMenu()
-    else:
-      print('Você não possui nenhuma regra cadastrada! Cadastre uma para prosseguir.')
-      self.management.createNewRule()
+    self.addItemToCard()
+    self.shoppingCartMenu()
+    # if len(self.dbConnect.getDbRules()) > 0:
+    # else:
+    #   print('Você não possui nenhuma regra cadastrada! Cadastre uma para prosseguir.')
+    #   self.management.createNewRule()
 
   def evaluateRules(self):
     self.dbConnect.updateRules()

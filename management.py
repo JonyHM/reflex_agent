@@ -25,22 +25,22 @@ class Management:
     self.dbConnect.updateRules()
     dbRules = self.dbConnect.getDbRules()
 
-    if len(dbRules) > 0:
-      for index, rule in enumerate(dbRules):
-        products = '; '.join(rule['products']['values'])
-        relation = rule['relation']
-        action = rule['action']
-        
-        print(f'\n{index + 1} -')
-        print(f'Produtos: {products}')
-        print(f'Relação: {relation}')
-        print(f'Recomendação: {action}\n')
+    for index, rule in enumerate(dbRules):
+      products = '; '.join(rule['products']['values'])
+      relation = rule['relation']
+      action = rule['action']
+      
+      print(f'\n{index + 1} -')
+      print(f'Produtos: {products}')
+      print(f'Relação: {relation}')
+      print(f'Recomendação: {action}\n')
 
-      if returnToMainMenu:
-        self.shopping.returnToMain(self.shopping.showManagementMenu)
-    else:
-      print('Você não possui nenhuma regra cadastrada! Cadastre uma para prosseguir.')
-      self.createNewRule()
+    if returnToMainMenu:
+      self.shopping.returnToMain(self.shopping.showManagementMenu)
+    # if len(dbRules) > 0:
+    # else:
+    #   print('Você não possui nenhuma regra cadastrada! Cadastre uma para prosseguir.')
+    #   self.createNewRule()
 
   def createNewRule(self):
     print('\nCriar nova regra\n')
